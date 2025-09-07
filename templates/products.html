@@ -1,0 +1,117 @@
+
+    {% extends 'base.html' %}
+    {% block content %}
+    <div class="card card-modern p-3">
+      <h4>السلع</h4>
+      <form method="post" action="{{ url_for('add_product') }}" class="row g-2">
+        <div class="col-md-3"><input class="form-control" name="name" placeholder="اسم السلعة" required></div>
+        <div class="col-md-2"><input class="form-control" name="stock" placeholder="المخزون" type="number"></div>
+        <div class="col-md-2"><input class="form-control" name="price_wholesale" placeholder="ثمن الجملة"></div>
+        <div class="col-md-2"><input class="form-control" name="price_retail" placeholder="ثمن التجزئة"></div>
+        <div class="col-md-2"><input class="form-control" name="notes" placeholder="ملاحظات"></div>
+        <div class="col-md-1"><button class="btn btn-primary">إضافة</button></div>
+      </form>
+      <hr>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>المخزون</th>
+            <th>سعر الجملة</th>
+            <th>سعر التجزئة</th>
+            <th>عمليات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ p.stock }}</td>
+            <td>{{ p.price_wholesale }}</td>
+            <td>{{ p.price_retail }}</td>
+            <td>
+              <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#unpackModal-{{ p.id }}">
+                تفكيك
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal-{{ p.id }}">
+                تعديل
+              </button>
+              <a href="{{ url_for('delete_product', id=p.id) }}" class="btn btn-sm btn-danger">حذف</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Edit Modals -->
+    {% for p in products %}
+    <div class="modal fade" id="editModal-{{ p.id }}" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">تعديل المنتج: {{ p.name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{{ url_for('update_product', id=p.id) }}">
+            <div class="modal-body">
+              <div class="mb-3"><label>الاسم</label><input type="text" name="name" class="form-control" value="{{ p.name }}" required></div>
+              <div class="mb-3"><label>المخزون</label><input type="number" name="stock" class="form-control" value="{{ p.stock }}"></div>
+              <div class="mb-3"><label>سعر الجملة</label><input type="text" name="price_wholesale" class="form-control" value="{{ p.price_wholesale }}"></div>
+              <div class="mb-3"><label>سعر التجزئة</label><input type="text" name="price_retail" class="form-control" value="{{ p.price_retail }}"></div>
+              <div class="mb-3"><label>ملاحظات</label><textarea name="notes" class="form-control">{{ p.notes or '' }}</textarea></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+              <button type="submit" class="btn btn-primary">حفظ</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Unpack Modals -->
+    {% for p in products %}
+    <div class="modal fade" id="unpackModal-{{ p.id }}" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">تفكيك: {{ p.name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{{ url_for('unpack_product') }}">
+            <input type="hidden" name="source_product_id" value="{{ p.id }}">
+            <div class="modal-body">
+              <p>سيتم تحويل الكمية إلى منتج "بيض". إذا لم يكن موجوداً، سيتم إنشاؤه بالأسعار التي تحددها أدناه.</p>
+              <hr>
+              <div class="mb-3">
+                <label>الكمية المراد تفكيكها (من {{ p.name }})</label>
+                <input type="number" name="quantity" class="form-control" value="1" min="1" max="{{ p.stock }}" required>
+              </div>
+              <div class="mb-3">
+                <label>عدد القطع لكل وحدة (مثال: 30 بيضة في الطبق)</label>
+                <input type="number" name="pieces_per_unit" class="form-control" value="30" required>
+              </div>
+              <h6 class="mt-4">تسعير البيض (قطعة)</h6>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label>سعر الجملة للقطعة</label>
+                  <input type="text" name="new_product_price_wholesale" class="form-control" placeholder="مثال: 15.00" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label>سعر التجزئة للقطعة</label>
+                  <input type="text" name="new_product_price_retail" class="form-control" placeholder="مثال: 20.00" required>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+              <button type="submit" class="btn btn-success">تأكيد التفكيك</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endblock %}

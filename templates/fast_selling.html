@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+  }
+  .product-card {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15px;
+  }
+  .product-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .product-stock {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+  }
+  .product-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #0d6efd;
+    margin-bottom: 15px;
+  }
+  .sell-btn {
+    width: 100%;
+  }
+</style>
+
+<div class="card card-modern p-4">
+  <h4 class="mb-4 text-center">شاشة البيع السريع</h4>
+
+  <div class="product-grid">
+    {% for p in products %}
+      <form method="post" action="{{ url_for('fast_sell') }}" class="product-card-form">
+        <div class="product-card" data-unit-price="{{ p.price_retail }}">
+          <div>
+            <div class="product-name">{{ p.name }}</div>
+            <div class="product-stock">المخزون: {{ p.stock }}</div>
+            
+            <div class="input-group my-3">
+              <span class="input-group-text">الكمية</span>
+              <input type="number" class="form-control quantity-input" name="quantity" value="1" min="1" max="{{ p.stock }}">
+            </div>
+
+            <div class="product-price">{{ "%.2f"|format(p.price_retail) }} د.ج</div>
+          </div>
+          <input type="hidden" name="product_id" value="{{ p.id }}">
+          <div class="btn-group w-100 mt-2">
+            <button type="submit" class="btn btn-primary sell-btn" data-product-name="{{ p.name }}">
+              بيع
+            </button>
+            {% if 'طبق' in p.name or 'بلاطو' in p.name %}
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#unpackModal-{{ p.id }}">
+              تفكيك
+            </button>
+            {% endif %}
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#damagedModal-{{ p.id }}">
+                تالف
+            </button>
+          </div>
+        </div>
+      </form>
+    {% else %}
+      <p class="text-center text-muted">لا توجد منتجات لعرضها.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Unpack Modals -->
+{% for p in products %}
+{% if 'طبق' in p.name or 'بلاطو' in p.name %}
+<div class="modal fade" id="unpackModal-{{ p.id }}" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">تفكيك: {{ p.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{{ url_for('unpack_product') }}">
+        <input type="hidden" name="source_product_id" value="{{ p.id }}">
+        <input type="hidden" name="redirect_to" value="fast_selling">
+        <div class="modal-body">
+          <p>سيتم تحويل الكمية إلى منتج "بيض". إذا لم يكن موجوداً، سيتم إنشاؤه بالأسعار التي تحددها أدناه.</p>
+          <hr>
+          <div class="mb-3">
+            <label>الكمية المراد تفكيكها (من {{ p.name }})</label>
+            <input type="number" name="quantity" class="form-control" value="1" min="1" max="{{ p.stock }}" required>
+          </div>
+          <div class="mb-3">
+            <label>عدد القطع لكل وحدة (مثال: 30 بيضة في الطبق)</label>
+            <input type="number" name="pieces_per_unit" class="form-control" value="30" required>
+          </div>
+          <h6 class="mt-4">تسعير البيض (قطعة)</h6>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>سعر الجملة للقطعة</label>
+              <input type="text" name="new_product_price_wholesale" class="form-control" placeholder="مثال: 15.00" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>سعر التجزئة للقطعة</label>
+              <input type="text" name="new_product_price_retail" class="form-control" placeholder="مثال: 20.00" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+          <button type="submit" class="btn btn-success">تأكيد التفكيك</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<!-- Damaged Modals -->
+{% for p in products %}
+<div class="modal fade" id="damagedModal-{{ p.id }}" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">إخراج تالف: {{ p.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{{ url_for('remove_damaged_product') }}">
+        <input type="hidden" name="product_id" value="{{ p.id }}">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label>الكمية التالفة (المخزون الحالي: {{ p.stock }})</label>
+            <input type="number" name="quantity" class="form-control" value="1" min="1" max="{{ p.stock }}" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+          <button type="submit" class="btn btn-danger">تأكيد الإخراج</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const productForms = document.querySelectorAll('.product-card-form');
+
+  productForms.forEach(form => {
+    const quantityInput = form.querySelector('.quantity-input');
+    const priceDisplay = form.querySelector('.product-price');
+    const sellButton = form.querySelector('.sell-btn');
+    const card = form.querySelector('.product-card');
+    const unitPrice = parseFloat(card.dataset.unitPrice);
+
+    function updatePrice() {
+      const quantity = parseInt(quantityInput.value, 10);
+      if (isNaN(quantity) || quantity < 1) {
+        priceDisplay.textContent = '0.00 د.ج';
+        return;
+      }
+      const totalPrice = (unitPrice * quantity).toFixed(2);
+      priceDisplay.textContent = `${totalPrice} د.ج`;
+    }
+
+    quantityInput.addEventListener('input', updatePrice);
+
+    form.addEventListener('submit', function(event) {
+      const productName = sellButton.dataset.productName;
+      const quantity = parseInt(quantityInput.value, 10);
+
+      if (isNaN(quantity) || quantity < 1) {
+        alert('الرجاء إدخال كمية صالحة.');
+        event.preventDefault(); // Stop form submission
+        return;
+      }
+
+      if (!confirm(`هل تريد بالتأكيد بيع ${quantity} من ${productName}؟`)) {
+        event.preventDefault(); // Stop form submission if user cancels
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

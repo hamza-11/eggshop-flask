@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card card-modern p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>ملخص ديون الزبائن</h4>
+        <a href="{{ url_for('export_debts_xls') }}" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> تصدير إلى Excel
+        </a>
+    </div>
+    <div class="alert alert-info">
+        إجمالي الديون المستحقة: <strong class="fw-bold text-danger">{{ "%.2f"|format(total_unpaid) }} د.ج</strong>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اسم الزبون</th>
+                <th class="text-end">إجمالي الدين</th>
+                <th class="text-center">عمليات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer, total_debt in customers_with_debt %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ customer.name }}</td>
+                <td class="text-end fw-bold text-danger">{{ "%.2f"|format(total_debt) }} د.ج</td>
+                <td class="text-center">
+                    <a href="{{ url_for('customer_ledger', customer_id=customer.id) }}" class="btn btn-sm btn-info">
+                        عرض كشف الحساب
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">لا توجد ديون مستحقة حالياً.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

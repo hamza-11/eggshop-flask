@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card card-modern p-3">
+  <h4>فاتورة بيع</h4>
+
+  {% if products %}
+  <form method="post">
+    <div class="row g-2">
+      <div class="col-md-4">
+        <label class="form-label">الزبون</label>
+        <select class="form-select" name="customer_id">
+          <option value="">-- زبون نقدي --</option>
+          {% for c in customers %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">طريقة الدفع</label>
+        <select name="payment_type" id="payment_type" class="form-select">
+          <option value="cash">كاش</option>
+          <option value="credit">دين</option>
+          <option value="partial">جزئي</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">المبلغ المدفوع</label>
+        <input class="form-control" name="paid_amount" id="paid_amount" type="number" step="0.01" value="0">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">ملاحظات</label>
+        <input class="form-control" name="notes" placeholder="ملاحظات">
+      </div>
+    </div>
+    <hr>
+    <table class="table" id="items-table">
+      <thead><tr><th>المنتج</th><th>المخزون</th><th>سعر الجملة</th><th>سعر التجزئة</th><th>الكمية</th><th>سعر البيع</th><th>الإجمالي</th><th></th></tr></thead>
+      <tbody>
+        <tr>
+          <td>
+            <select class="form-select product-select" name="product_id[]">
+              {% for p in products %}
+              <option value="{{ p.id }}" 
+                      data-stock="{{ p.stock }}"
+                      data-wholesale="{{ p.price_wholesale }}" 
+                      data-retail="{{ p.price_retail }}">
+                {{ p.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td class="stock-cell">{{ products[0].stock }}</td>
+          <td class="wholesale-price">{{ products[0].price_wholesale }}</td>
+          <td class="retail-price">{{ products[0].price_retail }}</td>
+          <td><input name="qty[]" class="form-control qty-input" type="number" value="1" min="1"></td>
+          <td><input name="price[]" class="form-control price-input" value="{{ products[0].price_retail }}"></td>
+          <td class="row-total"></td>
+          <td><button type="button" class="btn btn-danger btn-sm remove-row">-</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" id="add-row" class="btn btn-outline-primary">إضافة منتج</button>
+    <div class="float-end text-end">
+        <h4>الإجمالي: <span id="grand-total">0.00</span></h4>
+        <h4>المتبقي: <span id="due-amount">0.00</span></h4>
+    </div>
+    <button class="btn btn-success">حفظ و طباعة الفاتورة</button>
+  </form>
+  {% else %}
+  <div class="alert alert-warning">
+    لا توجد منتجات في المخزون. الرجاء <a href="{{ url_for('products') }}" class="alert-link">إضافة منتجات</a> أولاً قبل إنشاء فاتورة بيع.
+  </div>
+  {% endif %}
+</div>
+
+{% if products %}
+<script>
+  function setupRowListeners(row) {
+    row.querySelector('.product-select').addEventListener('change', updateRowDetails);
+    row.querySelector('.qty-input').addEventListener('input', calculateTotals);
+    row.querySelector('.price-input').addEventListener('input', calculateTotals);
+  }
+
+  function updateRowDetails(event) {
+    const select = event.target;
+    const row = select.closest('tr');
+    const selectedOption = select.options[select.selectedIndex];
+    
+    row.querySelector('.stock-cell').textContent = selectedOption.dataset.stock;
+    row.querySelector('.wholesale-price').textContent = selectedOption.dataset.wholesale;
+    row.querySelector('.retail-price').textContent = selectedOption.dataset.retail;
+    row.querySelector('.price-input').value = selectedOption.dataset.retail;
+    calculateTotals();
+  }
+
+  function calculateTotals() {
+    let grandTotal = 0;
+    document.querySelectorAll('#items-table tbody tr').forEach(row => {
+      const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+      const price = parseFloat(row.querySelector('.price-input').value) || 0;
+      const rowTotal = qty * price;
+      row.querySelector('.row-total').textContent = rowTotal.toFixed(2);
+      grandTotal += rowTotal;
+    });
+
+    document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+    
+    const paidAmount = parseFloat(document.getElementById('paid_amount').value) || 0;
+    const dueAmount = grandTotal - paidAmount;
+    document.getElementById('due-amount').textContent = dueAmount.toFixed(2);
+  }
+
+  document.getElementById('add-row').addEventListener('click', function() {
+    const tableBody = document.querySelector('#items-table tbody');
+    const newRow = tableBody.rows[0].cloneNode(true);
+    
+    newRow.querySelector('.product-select').selectedIndex = 0;
+    newRow.querySelector('.qty-input').value = '1';
+    
+    const firstOption = newRow.querySelector('.product-select').options[0];
+    newRow.querySelector('.stock-cell').textContent = firstOption.dataset.stock;
+    newRow.querySelector('.wholesale-price').textContent = firstOption.dataset.wholesale;
+    newRow.querySelector('.retail-price').textContent = firstOption.dataset.retail;
+    newRow.querySelector('.price-input').value = firstOption.dataset.retail;
+    
+    setupRowListeners(newRow);
+    tableBody.appendChild(newRow);
+    calculateTotals();
+  });
+
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('remove-row')) {
+      const tbody = document.querySelector('#items-table tbody');
+      if (tbody.rows.length > 1) {
+        e.target.closest('tr').remove();
+        calculateTotals();
+      }
+    }
+  });
+
+  document.getElementById('paid_amount').addEventListener('input', calculateTotals);
+
+  document.getElementById('payment_type').addEventListener('change', function(e) {
+    const grandTotal = parseFloat(document.getElementById('grand-total').textContent) || 0;
+    const paidAmountInput = document.getElementById('paid_amount');
+    if (e.target.value === 'cash') {
+      paidAmountInput.value = grandTotal.toFixed(2);
+    } else if (e.target.value === 'credit') {
+      paidAmountInput.value = '0';
+    }
+    calculateTotals();
+  });
+
+  // Initial setup
+  document.querySelectorAll('#items-table tbody tr').forEach(setupRowListeners);
+  calculateTotals();
+</script>
+{% endif %}
+{% endblock %}

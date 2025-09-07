@@ -1,0 +1,38 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-4">
+    <div class="card card-modern">
+      <div class="card-body">
+        <h3 class="card-title text-center mb-4">تسجيل الدخول</h3>
+        
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="alert alert-danger">
+              {% for msg in messages %}
+                <div>{{ msg }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+          <div class="mb-3">
+            <label for="username" class="form-label">اسم المستخدم</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">كلمة المرور</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">دخول</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

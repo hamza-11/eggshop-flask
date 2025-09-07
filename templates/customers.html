@@ -1,0 +1,65 @@
+
+    {% extends 'base.html' %}
+    {% block content %}
+    <div class="card card-modern p-3">
+      <h4>الزبائن</h4>
+      <form method="post" action="{{ url_for('add_customer') }}" class="row g-2">
+        <div class="col-md-4"><input class="form-control" name="name" placeholder="اسم الزبون" required></div>
+        <div class="col-md-3"><input class="form-control" name="phone" placeholder="الهاتف"></div>
+        <div class="col-md-4"><input class="form-control" name="notes" placeholder="ملاحظات"></div>
+        <div class="col-md-1"><button class="btn btn-primary">إضافة</button></div>
+      </form>
+      <hr>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الهاتف</th>
+            <th>الرصيد (الدين)</th>
+            <th>عمليات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in customers %}
+          <tr>
+            <td>{{ c.name }}</td>
+            <td>{{ c.phone }}</td>
+            <td><span class="fw-bold {% if c.balance > 0 %}text-danger{% endif %}">{{ "%.2f"|format(c.balance) }}</span></td>
+            <td>
+              <a href="{{ url_for('customer_ledger', customer_id=c.id) }}" class="btn btn-sm btn-info">كشف حساب</a>
+              <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal-{{ c.id }}">
+                تعديل
+              </button>
+              <a href="{{ url_for('delete_customer', id=c.id) }}" class="btn btn-sm btn-danger">حذف</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Edit Modals -->
+    {% for c in customers %}
+    <div class="modal fade" id="editModal-{{ c.id }}" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">تعديل بيانات: {{ c.name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{{ url_for('edit_customer', id=c.id) }}">
+            <div class="modal-body">
+              <div class="mb-3"><label>الاسم</label><input type="text" name="name" class="form-control" value="{{ c.name }}" required></div>
+              <div class="mb-3"><label>الهاتف</label><input type="text" name="phone" class="form-control" value="{{ c.phone }}"></div>
+              <div class="mb-3"><label>ملاحظات</label><textarea name="notes" class="form-control">{{ c.notes or '' }}</textarea></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+              <button type="submit" class="btn btn-primary">حفظ</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endblock %}

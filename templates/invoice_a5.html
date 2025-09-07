@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-f">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>فاتورة رقم {{ sale.id }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .a5-page {
+            width: 148mm;
+            height: 209mm;
+            padding: 10mm;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        .invoice-details {
+            margin-bottom: 20px;
+        }
+        .invoice-body {
+            flex-grow: 1;
+        }
+        .invoice-footer {
+            text-align: left;
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+        }
+        .no-print {
+            text-align: center;
+            margin: 20px;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            body {
+                background-color: white;
+                margin: 0;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .a5-page {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border: none;
+            }
+            html, body {
+                height: 100%;
+                overflow: hidden;
+            }
+            @page {
+                size: A5;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="a5-page">
+        <div class="invoice-header">
+            <h3>فاتورة بيع</h3>
+        </div>
+
+        <div class="invoice-details">
+            <div class="row">
+                <div class="col"><strong>الزبون:</strong> {{ sale.customer.name if sale.customer else 'زبون نقدي' }}</div>
+                <div class="col text-end"><strong>الرقم:</strong> {{ sale.id }}</div>
+            </div>
+            <div class="row">
+                <div class="col"></div>
+                <div class="col text-end"><strong>التاريخ:</strong> {{ sale.date.strftime('%Y-%m-%d %H:%M') }}</div>
+            </div>
+        </div>
+
+        <div class="invoice-body">
+            <table class="table table-sm table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>المنتج</th>
+                        <th class="text-center">الكمية</th>
+                        <th class="text-center">سعر الوحدة</th>
+                        <th class="text-end">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in sale.items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td class="text-center">{{ item.qty }}</td>
+                        <td class="text-center">{{ "%.2f"|format(item.unit_price) }}</td>
+                        <td class="text-end">{{ "%.2f"|format(item.qty * item.unit_price) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="invoice-footer">
+            <table class="table table-borderless table-sm text-end">
+                <tbody>
+                    <tr>
+                        <td><strong>مجموع الفاتورة:</strong></td>
+                        <td style="width: 120px;">{{ "%.2f"|format(sale.total) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>المبلغ المدفوع:</strong></td>
+                        <td>{{ "%.2f"|format(sale.paid_amount) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>المبلغ المتبقي من الفاتورة:</strong></td>
+                        <td>{{ "%.2f"|format(sale.due_amount) }}</td>
+                    </tr>
+                    {% if sale.customer %}
+                    <tr>
+                        <td><strong>الديون السابقة:</strong></td>
+                        <td>{{ "%.2f"|format(previous_debt) }}</td>
+                    </tr>
+                    <tr>
+                        <td><h5><strong>إجمالي الديون الحالية:</strong></h5></td>
+                        <td><h5><strong>{{ "%.2f"|format(sale.due_amount + previous_debt) }}</strong></h5></td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="no-print">
+        <button class="btn btn-primary" onclick="window.print()">طباعة الفاتورة</button>
+        <a href="{{ url_for('receipt', sale_id=sale.id) }}" class="btn btn-secondary">عرض سند البيع</a>
+        <a href="{{ url_for('index') }}" class="btn btn-info">العودة للرئيسية</a>
+    </div>
+
+</body>
+</html>

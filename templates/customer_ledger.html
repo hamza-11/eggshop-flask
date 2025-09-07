@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .balance-positive { color: #dc3545; } /* Red for debt */
+    .balance-zero { color: #198754; } /* Green for zero */
+    .transaction-debt { color: #dc3545; }
+    .transaction-payment { color: #198754; }
+</style>
+
+<div class="card card-modern">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">كشف حساب الزبون: {{ customer.name }}</h4>
+            <a href="{{ url_for('customers') }}" class="btn btn-sm btn-outline-secondary">العودة للزبائن</a>
+        </div>
+        <p class="text-muted">الهاتف: {{ customer.phone or 'غير متوفر' }}</p>
+        
+        <div class="card bg-light p-3 mb-4">
+            <h5 class="text-center">الرصيد الحالي</h5>
+            {% set balance = customer.balance %}
+            <h3 class="text-center fw-bold {% if balance > 0 %}balance-positive{% else %}balance-zero{% endif %}">
+                {{ "%.2f"|format(balance) }} د.ج
+            </h3>
+        </div>
+
+        <hr>
+
+        <!-- Add Transaction Form -->
+        <h5 class="mb-3">إضافة معاملة جديدة</h5>
+        <form action="{{ url_for('add_transaction') }}" method="POST" class="row g-3 border p-3 rounded mb-4">
+            <input type="hidden" name="customer_id" value="{{ customer.id }}">
+            <div class="col-md-3">
+                <label for="transaction_type" class="form-label">نوع المعاملة</label>
+                <select name="transaction_type" id="transaction_type" class="form-select" required>
+                    <option value="payment">دفعة / تسديد</option>
+                    <option value="debt">إضافة دين</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="amount" class="form-label">المبلغ</label>
+                <input type="text" name="amount" id="amount" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="col-md-4">
+                <label for="description" class="form-label">الوصف</label>
+                <input type="text" name="description" id="description" class="form-control" placeholder="مثال: دفعة نقدية، دين إضافي...">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">إضافة</button>
+            </div>
+        </form>
+
+        <!-- Transactions History -->
+        <h5 class="mb-3">سجل المعاملات</h5>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>النوع</th>
+                        <th>الوصف</th>
+                        <th class="text-end">المبلغ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            {% if t.transaction_type == 'debt' %}
+                                <span class="badge bg-danger">دين</span>
+                            {% else %}
+                                <span class="badge bg-success">تسديد</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t.description or '' }}</td>
+                        <td class="text-end fw-bold {% if t.transaction_type == 'debt' %}transaction-debt{% else %}transaction-payment{% endif %}">
+                            {{ "%.2f"|format(t.amount) }} د.ج
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">لا يوجد معاملات لعرضها.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

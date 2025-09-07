@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}التقارير{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">صفحة التقارير</h2>
+
+    <!-- Daily Sales Report -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>تقرير المبيعات اليومي</h4>
+        </div>
+        <div class="card-body">
+            <p>تصدير تقرير بجميع المبيعات التي تمت اليوم.</p>
+            <a href="{{ url_for('export_daily_sales_xls') }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> تصدير إلى Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- Sales by Date Range Report -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>تقرير المبيعات حسب التاريخ</h4>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('export_sales_by_date_xls') }}" method="GET">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="start_date">من تاريخ</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="end_date">إلى تاريخ</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">تصدير</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Debts Report -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>تقرير الديون</h4>
+        </div>
+        <div class="card-body">
+            <p>تصدير قائمة بجميع ديون الزبائن الحالية.</p>
+            <a href="{{ url_for('export_debts_xls') }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> تصدير إلى Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- Damaged Products Report -->
+    <div class="card">
+        <div class="card-header">
+            <h4>تقرير البيض التالف</h4>
+        </div>
+        <div class="card-body">
+             <form action="{{ url_for('export_damaged_products_xls') }}" method="GET">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="start_date_damaged">من تاريخ</label>
+                            <input type="date" id="start_date_damaged" name="start_date" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="end_date_damaged">إلى تاريخ</label>
+                            <input type="date" id="end_date_damaged" name="end_date" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">تصدير</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

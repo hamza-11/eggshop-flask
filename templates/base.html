@@ -1,0 +1,66 @@
+
+    <!doctype html>
+    <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>تسيير محل بيع البيض</title>
+     
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+      </head>
+  <style>
+  /* يمكنك إبقاء باقي الأنماط، لكن نُزيل font-family من body */
+  body { background: #f5f7fb; }
+  .card-modern { border-radius: 14px; box-shadow: 0 6px 18px rgba(20,30,50,0.06); }
+  .a5 { width: 148mm; height: 210mm; padding: 12mm; background: white; margin: auto; }
+  .rtl { direction: rtl; text-align: right; }
+  .navbar-logo {
+    width: 150px;    /* تحكم في العرض */
+    height: auto;   /* يحافظ على التناسب تلقائياً */
+    max-height: 150px; /* حد أقصى للارتفاع (اختياري) */
+  }
+
+</style>
+      <body class="rtl">
+        {% if current_user.is_authenticated %}
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+          <div class="container">
+            <img 
+              src="{{ url_for('static', filename='logo.png') }}" 
+              alt="شعار المحل" 
+              class="navbar-logo d-inline-block align-text-top"
+            >
+            <a class="navbar-brand" href="{{ url_for('index') }}">حمزة مغربي لبيع البيض</a>
+            <div class="collapse navbar-collapse">
+              <ul class="navbar-nav me-auto">
+                {% if current_user.role == 'admin' %}
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">الرئيسية</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('customers') }}">الزبائن</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('products') }}">السلع</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('inventory') }}">المخزون</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('all_debts') }}">الديون</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{{ url_for('reports') }}">التقارير</a></li>
+                {% endif %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('new_sale') }}">بيع</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('fast_selling') }}">بيع سريع</a></li>
+              </ul>
+              <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('logout') }}">تسجيل الخروج ({{ current_user.username }})</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        {% endif %}
+
+        <div class="container">
+          {% block content %}{% endblock %}
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      </body>
+    </html>

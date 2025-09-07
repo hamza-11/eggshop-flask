@@ -1,0 +1,306 @@
+/* ==================== */
+/* 1. تعريف الخطوط المحلية */
+/* ==================== */
+
+@font-face {
+    font-family: 'Cairo';
+    src: url('/static/Cairo/Cairo-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Cairo';
+    src: url('/static/Cairo/Cairo-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Cairo';
+    src: url('/static/Cairo/Cairo-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Cairo';
+    src: url('/static/Cairo/Cairo-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* ==================== */
+/* 2. التصميم العام */
+/* ==================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    direction: rtl;
+    background-color: #f8f9fc;
+    color: #333;
+    line-height: 1.7;
+    min-height: 100vh;
+    padding-top: 20px;
+}
+
+/* ==================== */
+/* 3. الشريط العلوي الحديث (Navbar) */
+/* ==================== */
+
+.navbar {
+    background: linear-gradient(135deg, #1e40af, #3730a3) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 0.7rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
+}
+
+.navbar-brand {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.4rem 1rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.5px;
+}
+
+.navbar-brand:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nav-link {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    color: #e0e7ff !important;
+    font-size: 1.30rem;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+/* تأثير خط ناعم تحت الرابط */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    width: 0;
+    height: 2px;
+    background: #818cf8;
+    transition: width 0.3s ease;
+    border-radius: 1px;
+}
+
+.nav-link:hover::after {
+    width: calc(100% - 20px);
+}
+
+/* تحسين زر التوجيه (في الجوال) */
+.navbar-toggler {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.collapse .navbar-nav .nav-item .nav-link {
+    margin: 4px 0;
+}
+
+/* ==================== */
+/* 4. الحاويات والبطاقات */
+/* ==================== */
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.card-modern {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* ==================== */
+/* 5. الجداول */
+/* ==================== */
+
+/* ==================== */
+/* 5. تحسين كامل لتصميم الجدول */
+/* ==================== */
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 25px 0;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    font-size: 1.00rem;
+    text-align: center;
+    direction: rtl;
+}
+
+/* عناوين الجدول - تمت تحسينها للوضوح الكامل */
+th {
+    background: linear-gradient(135deg, #c8c6e1, #c8c6e1);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.00rem;
+    padding: 14px 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* تحسين الحدود بين الصفوف */
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #eef2ff;
+    vertical-align: middle;
+}
+
+/* إزالة الحد السفلي من آخر صف */
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* تأثير hover على الصفوف */
+tr:hover {
+    background-color: #f0f4ff;
+    transform: scale(1.005);
+    transition: all 0.2s ease;
+}
+
+/* تحسين مظهر الصفوف العادية */
+tbody tr {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+/* تحسين المظهر العام للجداول داخل البطاقات */
+.card-modern table {
+    margin-bottom: 0;
+    border-radius: 12px;
+}
+/* ==================== */
+/* 6. الأزرار */
+/* ==================== */
+
+button {
+    font-family: 'Cairo', sans-serif;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+}
+
+button:hover {
+    background-color: #4338ca;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* ==================== */
+/* 7. التنبيهات (Alerts) */
+/* ==================== */
+
+.alert {
+    font-family: 'Cairo', sans-serif;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
+    background: #bbf7d0;
+    color: #166534;
+    border: 1px solid #86efac;
+    font-size: 0.95rem;
+}
+
+/* ==================== */
+/* 8. الطباعة (A4) */
+/* ==================== */
+
+.a5 {
+    width: 148mm;
+    height: 210mm;
+    padding: 12mm;
+    background: white;
+    margin: 2rem auto;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    page-break-inside: avoid;
+}
+
+/* ==================== */
+/* 9. التوافق مع الجوال */
+/* ==================== */
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.3rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .nav-link {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem !important;
+    }
+
+    .container {
+        width: 95%;
+        padding: 0 10px;
+    }
+
+    th, td {
+        padding: 8px 5px;
+        font-size: 0.85rem;
+    }
+
+    button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}

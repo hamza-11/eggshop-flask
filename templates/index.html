@@ -1,0 +1,125 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="mb-4">لوحة التحكم</h1>
+
+<!-- Stats Cards -->
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card card-modern h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted">مبيعات اليوم</h6>
+                <h4 class="mb-0">{{ "%.2f"|format(stats.total_sales_today) }}</h4>
+                <small class="text-muted">نقدي: {{ "%.2f"|format(stats.cash_sales_today) }} | آجل: {{ "%.2f"|format(stats.credit_sales_today) }}</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card card-modern h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted">إجمالي الديون</h6>
+                <h4 class="mb-0 text-danger">{{ "%.2f"|format(stats.total_unpaid_debt) }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-modern h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted">تنبيهات المخزون</h6>
+                <h4 class="mb-0 text-warning">{{ stats.low_stock_count }}</h4>
+                <small class="text-muted">منتجات تحتاج لإعادة تموين</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-modern h-100">
+            <div class="card-body text-center">
+                <h6 class="card-title text-muted">إجمالي التالف اليوم</h6>
+                <h4 class="mb-0 text-secondary">{{ stats.damaged_today }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Sections -->
+<div class="row">
+    <!-- Recent Sales with Profit -->
+    <div class="col-md-7 mb-4">
+        <div class="card card-modern">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">أحدث المبيعات</h5>
+                <a href="{{ url_for('export_daily_sales_xls') }}" class="btn btn-sm btn-outline-success">
+                    <i class="fas fa-file-excel"></i> تصدير مبيعات اليوم
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>الزبون</th>
+                            <th>اسم السلعة</th>
+                            <th>الكمية</th>
+                            <th>المجموع</th>
+                            <th>التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in recent_sale_items %}
+                        <tr>
+                            <td>{{ item.sale.customer.name if item.sale.customer else 'زبون نقدي' }}</td>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.qty }}</td>
+                            <td>{{ "%.2f"|format(item.qty * item.unit_price) }}</td>
+                            <td><small>{{ item.sale.date.strftime('%Y-%m-%d %H:%M') }}</small></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">لا توجد مبيعات بعد.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Debtors & Low Stock -->
+    <div class="col-md-5">
+        <!-- Top Debtors -->
+        <div class="card card-modern mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">أكبر الديون</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for customer, total_debt in top_debtors %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{{ url_for('customer_ledger', customer_id=customer.id) }}">{{ customer.name }}</a>
+                    <span class="badge bg-danger rounded-pill">{{ "%.2f"|format(total_debt) }}</span>
+                </li>
+                {% else %}
+                <li class="list-group-item text-center text-muted">لا توجد ديون حاليًا.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Low Stock Products -->
+        <div class="card card-modern">
+            <div class="card-header">
+                <h5 class="card-title mb-0">منتجات منخفضة المخزون</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for product in low_stock_products %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ product.name }}
+                    <span class="badge bg-warning rounded-pill">{{ product.stock }}</span>
+                </li>
+                {% else %}
+                <li class="list-group-item text-center text-muted">المخزون بحالة جيدة.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
